@@ -18,4 +18,3 @@ Third-party papers - not necessarily related:
 * [Zaharia, Matei, et al. "Spark: Cluster computing with working sets." HotCloud 10.10-10 (2010): 95](./ref/2010-Spark:_Cluster_Computing_with_Working_Sets)
 * B. Nitzberg and V. Lo. Distributed shared memory: a survey of issues and algorithms. Computer, 24(8):52 –60
 * H.-c. Yang, A. Dasdan, R.-L. Hsiao, and D. S. Parker. Map-reduce-merge: simplified relational data processing on large clusters. In SIGMOD ’07, pages 1029–1040. ACM, 2007.
-* B. Nitzberg and V. Lo. Distributed shared memory: a survey of issues and algorithms. Computer, 24(8):52 –60, aug 1991.

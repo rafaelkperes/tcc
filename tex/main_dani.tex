@@ -1,0 +1,646 @@
+% 
+% exemplo genérico de uso da classe iiufrgs.cls
+% $Id: iiufrgs.tex,v 1.1.1.1 2005/01/18 23:54:42 avila Exp $
+% 
+% This is an example file and is hereby explicitly put in the
+% public domain.
+% 
+\documentclass[cic,tc]{iiufrgs}
+% Para usar o modelo, deve-se informar o programa e o tipo de documento.
+% Programas :
+% * cic       -- Graduação em Ciência da Computação
+% * ecp       -- Graduação em Ciência da Computação
+% * ppgc      -- Programa de Pós Graduação em Computação
+% * pgmigro   -- Programa de Pós Graduação em Microeletrônica
+% 
+% Tipos de Documento:
+% * tc                -- Trabalhos de Conclusão (apenas cic e ecp)
+% * diss ou mestrado  -- Dissertações de Mestrado (ppgc e pgmicro)
+% * tese ou doutorado -- Teses de Doutorado (ppgc e pgmicro)
+% * ti                -- Trabalho Individual (ppgc e pgmicro)
+% 
+% Outras Opções:
+% * english    -- para textos em inglês
+% * openright  -- Força início de capítulos em páginas ímpares (padrão da
+% biblioteca)
+% * oneside    -- Desliga frente-e-verso
+% * nominatalocal -- Lê os dados da nominata do arquivo nominatalocal.def
+
+
+% Use unicode
+\usepackage[utf8]{inputenc}   % pacote para acentuação
+
+% Necessário para incluir figuras
+\usepackage{graphicx}         % pacote para importar figuras
+
+\usepackage{times}            % pacote para usar fonte Adobe Times
+
+\usepackage[alf,abnt-emphasize=bf]{abntex2cite}	% pacote para usar citações abnt
+\usepackage{longtable}
+
+\usepackage{textcomp,amsmath}
+\usepackage{latexsym}
+
+\usepackage{capt-of}
+\usepackage{float}
+
+% 
+% Informações gerais
+% 
+\title{Visualização de dados quantitativos como apoio à análise de desempenho de alunos de graduação da UFRGS}
+
+\author{Cavalheiro}{Daniela Mendonça}
+% alguns documentos podem ter varios autores:
+% \author{Flaumann}{Frida Gutenberg}
+% \author{Flaumann}{Klaus Gutenberg}
+
+% orientador e co-orientador são opcionais (não diga isso pra eles :))
+\advisor[Prof.~Dr.]{Freitas}{Carla M.D.S.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                               inicio do documento                                 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+% folha de rosto
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\maketitle
+
+% Agradecimentos
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter*{Agradecimentos}
+AGRADECIMENTOS À: CPD, PROPLAN, NAU, Daniel, Thiago, Vitor
+
+% Palavras chave
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\keyword{visualização de informação}
+\keyword{dados institucionais}
+\keyword{acesso informação}
+
+% Resumo em português
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{abstract}
+    RESUMO
+\end{abstract}
+
+% English abstract
+% @english_title, @keywords
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{englishabstract}{Institutional Data Visualization of UFRGS Regarding Graduation}{information visualization, institutional data, data access}
+
+\end{englishabstract}
+
+% lista de figuras
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\listoffigures
+
+% lista de tabelas
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\listoftables
+
+% lista de abreviaturas e siglas
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{listofabbrv}{WYSIWYG} % abrev. mais longa
+    \item[AJAX] Asynchronous JavaScript And XML
+    \item[CPD] Centro de Processamento de Dados UFRGS
+    \item[DOM] Document Object Model
+    \item[HTML] HyperText Markup Language
+    \item[JS] JavaScript
+    \item[JSON] JavaScript Object Notation
+    \item[MVC] Model-View-Controller
+    \item[PHP] Hypertext Preprocessor
+    \item[PROPLAN] Pró-Reitoria de Planejamento e Administração da UFRGS 
+    \item[SQL] Structured Query Language
+    \item[SVG] Scalable Vector Graphics
+    \item[NAU] Núcleo de Avaliação da Unidade
+    
+\end{listofabbrv}
+
+% sumario
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tableofcontents
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                   Monografia                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 1 Introducao
+%     1.1 Motivação: Importância da análise quantitiva de dados em processos avaliativos da graduação para promover melhorias em várias aspectos das atividades relacionadas ao ensino
+%     
+%   1.2 Possibilidade de utilização de dados registrados nos bancos de dados da UFRGS relativos ao corpo discente
+%
+%   1.3 Objetivos : apresentar de forma interativa os dados os dados dos alunos (egressos, evadidos, com vinculo, aprovados, reprovados, etc) de um curso de graduação escolhido para auxiliar CONGRADs, NAUs e departamentos na avaliação do desempenho dos alunos
+%
+%   1.4 Estrutura Deste trabalho
+%
+% 2 Levantamento de Requisitos
+%     
+% 3 Dados e Métodos 
+% 4 Painel Analítoco de dados do corpo Discente da graduação
+% 5 Avaliação e Discussão
+% 6 Conclusão e Possíveis Extensões de Trabalho
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 1 Introducao
+%     1.1 Motivação: Importância da análise quantitiva de dados em processos avaliativos da graduação para promover melhorias em várias aspectos das atividades relacionadas ao ensino
+%     
+%   1.2 Possibilidade de utilização de dados registrados nos bancos de dados da UFRGS relativos ao corpo discente
+%
+%   1.3 Objetivos : apresentar de forma interativa os dados os dados dos alunos (egressos, evadidos, com vinculo, aprovados, reprovados, etc) de um curso de graduação escolhido para auxiliar CONGRADs, NAUs e departamentos na avaliação do desempenho dos alunos
+%
+%   1.4 Estrutura Deste trabalho
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Introdução}\label{cap_1_intro}
+O armazenamento de dados sobre conceitos, disciplinas, matrícula e todos os dados de um aluno durante o período de graduação com certeza vem sido feito desde antes de os registros serem em sistemas no computador. Dados de mais de 3 ou 4 décadas ocupam os servidores da UFRGS e mantém o histórico dos alunos que passaram pela universidade guardado e seguro. Porém, não se tem nenhum sistema que trabalhe esses dados de forma a auxiliar não só o acompanhamento do aluno mas o desenvolvimento do curso com base nesses dados. 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Motivação}\label{cap_1_1_motiv}
+
+Um problema que vem sido observado nos cursos de Computação da UFRGS é a demora dos alunos para concluir o curso. Embora os cursos tenham uma sugestão de disciplinas a se seguir a cada semestre, muitos alunos não conseguem acompanhar, seja por estar trabalhando junto com a faculdade, reprovar em cadeiras, não dar conta da carga horária e outros casos que não tem como saber com as análises atuais. E como o acompanhamento geral dos alunos se dá pela quantidade de créditos obtidos e o tempo de curso, quando se descobre que o aluno pode ter algum problema é quando ele está para ser jubilado ou nem se descobre e o aluno já evadiu o curso. 
+
+Esta é a preocupação principal do NAU: a razão dos alunos evadirem. Há quase uma década o NAU espera conseguir acesso ao histórico dos alunos de forma a conseguir uma análise mais precisa do que pode estar acontecendo. De forma que com dados concretos, possa-se provar suspeitas do que podem levar um aluno a abandonar o curso.
+
+Também com interesse da PROPLAN em ter um painel de dados estatítiscos para as COMGRADs terem um melhor acesso e acompanhamento e uma visão geral e individual do curso e dos alunos, em questões de desempenho acadêmico, tempo de curso, avaliação de disciplinas e acompanhamento individual de alunos.
+
+Como aluna da graduação da Ciência da Computação e tendo eu mesma presenciado casos de vários colegas e amigos evadindo, demorando anos para se formar e, por parte dos alunos, se sentindo sem muitas opções quanto ao que fazer às adversidades que surgiram durante o curso, também é do meu interesse o desenvolvimento e a evolução desse sistema de forma que não somente se tenha e desenvolva uma visualização sobre os dados, mas que seja homologado e útil à vida acadêmica na UFRGS de forma a não somente evoluir, mas a aprimorar o acompanhamento e análise de alunos e disciplinas de um curso e ter assim um melhor desempenho de todos.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Contexto Específico}\label{cap_1_3_context}
+Este trabalho foi desenvolvido dentro do CPD da UFRGS, de forma que os dados utilizados são providos pelo banco de dados da própria universidade e o trabalho servirá de piloto para se tornar um sistema de \textit{Painel da Graduação} acessível pelos órgãos responsáveis pelo portal da UFRGS. E no futuro não se limitará aos cursos de informática, mas para todos os cursos da oferecidos pela universidade..
+
+\section{Objetivos}\label{cap_1_2_objet}
+O objetivo desse trabalho é apresentar soluções para a visualização de dados referente à matrículas dos alunos, apresentando de maneira dinâmica créditos, disciplinas, conceitos e a situação do aluno. Podendo delimitar essas visualizações entre homens e mulheres, formas de ingresso no curso e situação do aluno como egresso, evadido e vinculado.
+
+\section{Estrutura deste Trabalho}\label{cap_1_4_estrut}
+Este trabalho está dividido em seis capítulos sendo este o primeiro. O segundo capítulo faz o levantamento dos requisitos por parte do NAU e da PROPLAN. O terceiro capítulo descreve a base de dados utilizada para as visualizações desenvolvidas. O quarto capítulo descreve o painel e cada visualização feita, justificando os tipos de análises e interações entre cada gráfico. O quinto capítulo fala sobre as avaliações feitas por parte de representantes da PROPLAN, NAU e CPD(?). O sexto capítulo mostra as conclusões desse trabalho, o que pode ser aprimorado num futuro próximo e trabalhos futuros.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 2 Trabalhos Relacionados
+%     Descrever e apresentar aplicativos / trabalhos relacionados, listando 
+%     funcionalidades, algumas telas (foco no diferencial). Destacar o que é bom ou 
+%     ruim. Comparação entre eles. Usar isso para mostrar a necessidade ou diferencial 
+%     do teu.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Levantamento de Requisitos}\label{cap_2_trabs_rel}
+Para este trabalho foi considerado as demandas do NAU e da PROPLAN e com base nessas demandas foi desenvolvido um painel análitico para servir como projeto piloto para a implementação de um painel de graduação para serem acessíveis pelos órgãos responsáveis da UFRGS.
+
+\section{Requisitos do Núcleo de Avaliação de Unidade - NAU}
+O NAU, representado neste trabalho pelo professor Renato Ribas do instituto de Informática, tem uma demanda bem específica de dados sobre quais o núcleo deseja o acesso para poderem fazer análises sobre suspeitas de evasão e aproveitamento do curso.
+Para isso necessitam de primeiro lugar dos dados sobre os históricos do alunos. Os dados a serem selecionados seriam referente às disciplinas matriculadas: créditos matriculados, créditos aprovados, reprovados, com conceito "FF" como também a organização desses dados pelo conceito de \textit{"matrícula do aluno"}, de forma a não considerar semestres em que o aluno não fez a matrícula, assim alunos que fizeram a 3ª matrícula no 4º semestre de curso, iriam ter seus dados quantizados com os que fizeram a 3ª matrícula no 3º semestre ou em outro semestre quando esta matrícula ocorreu.
+
+Adiantando previamente um problema desta medida é a questão dos alunos não seguirem o currículo do curso de acordo com o sugerido com a universidade. E distribuir os dados por matrículas não gerou um resultado positivo do que se gostaria de ver, de forma que este parâmetro foi reavaliado, e considerou-se manter o conceito de matrícula presente, mas distribuir os dados no tempo por semestres, de forma a também trazer informações sobre o vínculo do aluno ao curso.
+
+Também é do interesse do NAU poder ter uma visão do curso partindo pelo lado das disciplinas. Com dados que mostrem quantos alunos já passaram por elas, conceitos, quantidade de alunos que fizeram a disciplina mais de uma vez, distribuição dos alunos vinculados ao curso nas disciplinas do currículo corrente, dados sobre professores, avaliações, etc.
+
+E por último, o NAU deseja que o grupo de alunos a ser selecionado possa ser filtrado considerando a situação do aluno: \textit{egressos}, \textit{evadidos} e \textit{vinculados}.
+
+O NAU deixa claro que deseja poder ter um acesso geral às informações e que não precisa de dados pessoias. Todos os dados necessários para a avaliação são referentes ao curso e à amostra específica de alunos dos alunos de acordo com a seleção a ser estudada. 
+
+\section{Requisitos da PROPLAN}
+A PROPLAN, com o início do desenvolvimento do Portal de Transparência da UFRGS (UFRGS em números), tem interesse em um sistema semelhante para dados internos da universidade. Como uma ferramenta de acesso pelas COMGRADs, eles tem a ideia de uma painel com gráficos que mostrem a \textit{vida} do aluno durante o curso, de forma que não só apresente o histórico e conceitos, mas o andamento do desempenho do aluno como em comparação com sua turma de ingresso e ou outros grupos. 
+
+Para a PROPLAN é necessário ter está análise interna como uma inovação no acompanhamento de alunos pelas COMGRADs e na avaliação das disciplinas pelas mesmas. Para isso é importante não só a informação geral sobre um curso e uma turma, como as informações do aluno para uma avaliação individual.
+
+Também se requer informações por parte das disciplinas de forma a poder avaliar as mesmas no decorrer do seu período de execução, mas dependente das turmas de ingresso.
+
+Das reuniões executadas, a PROPLAN entrou em acordo de mesclar seus requisitos com os requisitos das NAUs.
+
+\section{Escopo do Trabalho}
+A partir destes requisitos da PROPLAN e do NAU foi definido que este trabalho seria desenvolvido sobre somente os dados dos alunos para se analisar a funcionalidade do projeto.
+
+Partindo do conceito de \textit{Turma de Ingresso}, os alunos são selecionados de acordo com o período que ingressaram no curso e podem ser classificados por gênero, forma de ingresso e situação atual (egresso, evadido e vinculado). E para esses dados são mostrados comparações entre média de créditos matriculados por esses alunos e/ou subgrupos, a média de disciplinas aprovadas, canceladas, reprovadas e com conceito \textit{FF}, e mais a situação do aluno em cada semestre do curso, como trancamento, abandono, transferência, etc.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Dados e Métodos}\label{cap_3_trabs_rel}
+
+Os dados utilizados neste trabalho são do próprio banco de dados da UFRGS. Por questões de sigilo, os nomes das tabelas utilizadas nas consultas e seus respectivos campos como a própria consulta não serão apresentados. As informações aqui listadas servirão para apresentar os dados que a universidade pode prover conforme seus registros.
+
+Para trazer todos os dados necessários sem ter muito custo ao banco, a consulta já traz, para cada aluno selecionado, uma linha com cada um dos semestres que já ocorreram durante o curso. Desta forma todos os dados necessários para os gráficos estão relacionados a cada semestre e são selecionados em uma única consulta. O tratamento e estruturação desses gráficos é feita posteriormente no programa.
+
+\section{Base de Dados da Graduação}
+
+Para cada aluno de uma \textit{turma de ingresso} são selecionados todos os dados \textit{pessoais} e determinados na Tabela \ref{tabDadosAlunos} como \textit{"constantes"}. Isso se dá pela dependência desses dados ser somente em relação ao aluno e não ao semestre.
+
+Já para cada semestres há a seleção de dados quanto às disciplinas cursadas, número de créditos, aprovações, reprovações, situação do aluno, etc. Esses dados estão definidos como \textit{"variáveis"} na Tabela \ref{tabDadosAlunos} por serem dependentes de cada semestre.
+
+
+
+
+\begin{longtable}[c]{|c|p{3cm}|p{4cm}|p{2cm}|}
+    \caption{Lista os dados dos alunos utilizados para as visualizações, separando por dados Constantes e dados Variáveis. \label{tabDadosAlunos}}\\
+
+    \hline
+    \multicolumn{3}{|c|}{Dados Pessoais \ref{tabDadosAlunos}}\\
+    \hline
+    Dado & Tipo & Descrição\\
+    \hline
+    \endfirsthead
+    
+    \hline
+    \multicolumn{3}{|c|}{Continuação da Tabela \ref{tabDadosAlunos}}\\
+    \hline
+    Dado & Tipo & Descrição\\
+    \hline
+    \endhead
+    
+    \hline
+    \endfoot
+    
+    \hline
+    \multicolumn{3}{| c |}{Fim da Tabela \ref{tabDadosAlunos}}\\
+    \hline\hline
+    \endlastfoot
+    
+        Cartão &   
+        Constante & 
+        Valor único referente à matrícula do aluno na UFRGS \\ \hline 
+        
+        Sexo &   
+        Constante & 
+        Gênero do aluno.  \\ \hline
+        
+        Tipo de Ingresso&
+        Constante &
+        Ingresso por Vestibular (Ampla Concorrência, Autodeclarado, Ensino Público, SISU), Transferência (Interna e Externa) e Outros (Alunos Especias, Convênio, etc). \\ \hline  
+        
+        Situação Atual do Aluno &
+        Constante *(para o ano atual) &
+        O status do aluno dentro do curso: Egresso, Evadido ou Vinculado.\\ \hline 
+        
+        Semestre Vigente &
+        Variável &
+        O semestre referente aos dados da matrícula apresentados. \\ \hline
+        
+        Registro de Aluno &
+        Variável &
+        O status do aluno naquele semestre Vinculado/Afastamento \\ \hline
+        
+        Créditos Matriculados &
+        Variável &
+        Número de créditos que o aluno se matriculou no Semestre Vigente. \\ \hline
+        
+        Créditos Aprovados &
+        Variável &
+        Número de créditos das disciplinas aprovadas no Semestre Vigente. \\ \hline
+        
+        Créditos Reprovados &
+        Variável &
+        Número de créditos das disciplinas reprovadas no Semestre Vigente. \\ \hline
+        
+        Créditos FF &
+        Variável &
+        Número de créditos das disciplinas com nota FF no Semestre Vigente. \\ \hline
+        
+        Disciplinas Matriculados &
+        Variável &
+        Número de disciplinas que o aluno se matriculou no Semestre Vigente. \\ \hline
+        
+        Créditos Aprovados &
+        Variável &
+        Número de disciplinas aprovadas no Semestre Vigente. \\ \hline
+        
+        Créditos Reprovados &
+        Variável &
+        Número de disciplinas reprovadas no Semestre Vigente. \\ \hline
+        
+        Créditos FF &
+        Variável &
+        Número de disciplinas com nota FF no Semestre Vigente. \\ \hline
+
+\end{longtable}
+
+\section{Estruturação dos Dados}
+
+    Apesar de dados variáveis provenientes da consulta já estarem vindo parcialmente tratados por conta da contagem de créditos e disciplinas, eles não são os dados finais a serem utilizados pela interface. Esta consulta tem como retorno uma linha por semestre e por aluno, e um dos processos a serem feitos é a contagem não só dos alunos, mas de quantos homens e quantas mulheres, quantos entraram por vestibular, transferências e quantos já se formaram estão cursando ou abandonaram o curso.
+    
+    Assim, os seguintes contadores são criados para os gráficos em pizza de gênero, ingresso e situação que são listados na Tabela \ref{tabContadores}.
+
+    \begin{longtable}[c]{|c|p{10cm}|p{2cm}|}
+    \caption{Contadores \label{tabContadores}}\\
+
+    \hline
+    \multicolumn{2}{|c|}{Contadores \ref{tabContadores}}\\
+    \hline
+    Contador & Descrição\\
+    \hline
+    \endfirsthead
+    
+    \hline
+    \multicolumn{2}{|c|}{Continuação da Tabela \ref{tabContadores}}\\
+    \hline
+    Contador & Descrição\\
+    \hline
+    \endhead
+    
+    \hline
+    \endfoot
+    
+    \hline
+    \multicolumn{2}{| c |}{Fim da Tabela \ref{tabContadores}}\\
+    \hline\hline
+    \endlastfoot
+    
+        Homens &   
+        Quantidade total de homens. \\ \hline 
+        
+        Mulheres &   
+        Quantidade total de mulheres. \\ \hline 
+        
+        Vestibular 1 &   
+        Quantidade total de alunos ingressos por ampla concorrência. \\ \hline 
+        
+        Vestibular 2 &   
+        Quantidade total de alunos ingressos por ensino público autodeclarado. \\ \hline
+        
+        Vestibular 3 &   
+        Quantidade total de alunos ingressos por ensino público. \\ \hline 
+        
+        Vestibular 4 &   
+        Quantidade total de alunos ingressos por ensino público autodeclarado com renda inferior. \\ \hline
+        
+        Vestibular 5 &   
+        Quantidade total de alunos ingressos por ensino público com renda inferior. \\ \hline 
+        
+        
+        Vestibular 6 &   
+        Quantidade total de alunos ingressos por ensino público autodeclarado deficiente físico. \\ \hline
+        
+        Vestibular 7 &   
+        Quantidade total de alunos ingressos por ensino público deficiente físico. \\ \hline 
+        
+        Vestibular 8 &   
+        Quantidade total de alunos ingressos por ensino público autodeclarado com renda inferior deficiente físico. \\ \hline
+        
+        Vestibular 9 &   
+        Quantidade total de alunos ingressos por ensino público com renda inferior deficiente físico. \\ \hline 
+        
+        Transferência Interna &
+        Quantidade total de alunos vindos de outro curso dentro da UFRGS. \\ \hline
+        
+        Transferência Externa &
+        Quantidade total de alunos vindos de outra instituição. \\ \hline
+        
+        Outros &
+        Casos como aluno especial, aluno convênio, etc. \\ \hline
+        
+        Egressos &
+        Quantidade total de alunos diplomados \\ \hline
+        
+        Vinculados &
+        Quantidade total de alunos cursando o curso \\ \hline
+        
+        Evadidos &
+        Quantidade de alunos em situação de abandono, desistência de vaga e etc \\ \hline
+        
+\end{longtable}
+
+   Para os demais gráficos é necessário preparar os dados, que estão organizados por aluno e por semestre, de acordo com o semestre, e fazer a quantificação total desses dados. Já na consulta, quando em um semestre não houve matrícula pelo aluno, há a informação na linha sobre a causa (se houve trancamento, abandono, etc). Desta forma é possível organizar os dados de todos os alunos no tempo de acordo com o semestre.
+   
+   Então é criado um \textit{array} de "semestres" que contém os quantificadores sumarizados na tabela \ref{tabQuantificadores}.
+   
+   \begin{longtable}[c]{|c|p{10cm}|p{2cm}|}
+    \caption{Quantificadores \label{tabQuantificadores}}\\
+
+    \hline
+    \multicolumn{2}{|c|}{Quantificadores \ref{tabQuantificadores}}\\
+    \hline
+    Quantificador & Descrição\\
+    \hline
+    \endfirsthead
+    
+    \hline
+    \multicolumn{2}{|c|}{Continuação da Tabela \ref{tabQuantificadores}}\\
+    \hline
+    Quantificador & Descrição\\
+    \hline
+    \endhead
+    
+    \hline
+    \endfoot
+    
+    \hline
+    \multicolumn{2}{| c |}{Fim da Tabela \ref{tabQuantificadores}}\\
+    \hline\hline
+    \endlastfoot
+    
+        Alunos &   
+        Quantidade de alunos \textit{matriculados} no determinado semestre. \\ \hline 
+        
+        Disciplinas Matriculadas &   
+        Quantidade total de disciplinas \textit{matriculadas} no determinado semestre. \\ \hline
+        
+        Disciplinas Aprovadas &   
+        Quantidade total de disciplinas \textit{aprovadas} no determinado semestre. \\ \hline
+        
+        Disciplinas Canceladas &   
+        Quantidade total de disciplinas \textit{canceladas} no determinado semestre. \\ \hline
+        
+        Disciplinas Reprovadas &   
+        Quantidade total de disciplinas \textit{reprovadas} no determinado semestre. \\ \hline
+        
+        Disciplinas com conceito FF &   
+        Quantidade total de disciplinas \textit{com FF} no determinado semestre. \\ \hline
+        
+        
+        Créditos Matriculados &   
+        Quantidade total de créditos de disciplinas \textit{matriculadas} no determinado semestre. \\ \hline
+        
+        Créditos Aprovadas &   
+        Quantidade total de créditos de disciplinas \textit{aprovadas} no determinado semestre. \\ \hline
+        
+        Disciplinas Canceladas &   
+        Quantidade total de créditos de disciplinas \textit{canceladas} no determinado semestre. \\ \hline
+        
+        Disciplinas Reprovadas &   
+        Quantidade total de créditos de disciplinas \textit{reprovadas} no determinado semestre. \\ \hline
+        
+        Disciplinas com conceito FF &   
+        Quantidade total de créditos de disciplinas \textit{com FF} no determinado semestre. \\ \hline
+        
+        Situação do Aluno no Semestre* &
+        Neste caso para cada situação [descrita no apêndice - as 56] que possa ter ocorrido com pelo menos um dos alunos, é criado um quantificador para guardar quantos alunos estavam na respectiva situação no determinado semestre. \\ \hline
+        
+        
+        
+\end{longtable}
+   
+   Dos dados de quantificação de \textit{disciplinas} e \textit{créditos} é ainda calculado a média, para cada semestre, conforme o número de alunos. Assim o gráfico correspondente aos conceitos de alunos mostrará sempre a média de aprovação, reprovação, cancelamento e disciplinas com FF a cada semestre. 
+   
+   E quanto ao gráfico de número de créditos por matrícula, mostra, além dos créditos de cada aluno, a média de créditos matriculados pela turma no determinado semestre.
+ 
+\section{Tecnologias}
+O desenvolvimento deste trabalho foi feito no framework YII em PHP com SQL SERVER para o acesso e tratamento dos dados, e utilizando os recursos da biblioteca de gráficos Highcharts em Javascript para a visualização.
+
+[Não sei se descrevo mais... ?]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\chapter{Painel Analítico de Dados do Corpo Discente da Graduação}\label{cap_4_painel}
+
+O painel desenvolvido é composto por um pequeno formulário, para a seleção entre os cursos de engenharia e ciência da computação e seleção do semestre da turma de ingresso. Essas são as informações básicas para se carregar os dados nos gráficos de pizza, \textit{de gênero, forma de ingresso e situação atual do aluno}, o gráfico da média de créditos matriculados por semestre, o gráfico de aproveitamento do curso e o gráfico de registro do aluno (Figura \ref{fig:painelGrad}).
+
+
+\begin{figure} [!ht]
+        \caption{Painel da Graduação}
+        \begin{center}
+            \includegraphics[width=35em]{figuras/Capturar.PNG}
+        \end{center}
+        
+        \label{fig:painelGrad}
+    \end{figure}
+    
+
+ 
+No formulário (Figura \ref{fig:formularioInicial}) há a opção de trazer ao invés de uma única turma, todas as turmas a partir do semestre selecionado, obtendo uma amostra maior sobre os dados (Figura \ref{fig:painelGradResultMany}).
+
+\begin{figure} [!ht]
+        \caption{Formulário Inicial}
+        \begin{center}
+            \includegraphics[width=35em]{figuras/Capturar2.PNG}
+        \end{center}
+        
+        \label{fig:formularioInicial}
+    \end{figure}
+ 
+\begin{figure} [!ht]
+        \caption{Painel da Graduação - resultados com mais de uma turma}
+        \begin{center}
+            \includegraphics[width=35em]{figuras/Capturar3.PNG}
+        \end{center}
+        
+        \label{fig:painelGradResultMany}
+    \end{figure}
+ 
+ E também é possível visualizar os dados de somente um aluno, selecionando no box de seleção de alunos (Figura \ref{fig:painelGradResultOne}).
+ 
+ \begin{figure} [!ht]
+        \caption{Painel da Graduação - seleção de um único aluno}
+        \begin{center}
+            \includegraphics[width=35em]{figuras/Capturar4.PNG}
+        \end{center}
+        
+        \label{fig:painelGradResultOne}
+    \end{figure}
+
+
+A partir dessa seleção inicial pelo formulário, no caso de uma ou mais turmas, é possível filtrar os dados a partir das opções nos gráfico em pizza, combinando a seleção entre eles.
+
+O primeiro \textit{Pie Chart} filtra entre homens (Figura \ref{fig:painelGradHomem}) ou mulheres (Figura \ref{fig:painelGradMullher}).
+
+\begin{figure} [!ht]
+        \caption{Painel da Graduação - Filtragem por Homens}
+        \begin{center}
+            \includegraphics[width=35em]{figuras/Capturar5.PNG}
+        \end{center}
+        
+        \label{fig:painelGradHomem}
+    \end{figure}
+
+\begin{figure} [!ht]
+        \caption{Painel da Graduação - Filtragem por Mulheres}
+        \begin{center}
+            \includegraphics[width=35em]{figuras/Capturar6.PNG}
+        \end{center}
+        
+        \label{fig:painelGradMullher}
+    \end{figure}
+
+
+O segundo filtra pelo tipo de ingresso no vestibular, cujas opções estão definidas na Tabela \ref{tabQuantificadores},  como mostra na Figura \ref{fig:painelGradFiltroIngr}.
+
+\begin{figure} [!ht]
+        \caption{Painel da Graduação - Filtragem por Tipo de Ingresso}
+        \begin{center}
+            \includegraphics[width=35em]{figuras/Capturar7.PNG}
+        \end{center}
+        
+        \label{fig:painelGradFiltroIngr}
+    \end{figure}
+
+E o último \textit{Pie Chart} filtra em relação a situação atual do aluno, seja \textit{Egresso}, \textit{Vinculado} ou \textit{Evadido}, como mostra na figura \ref{fig:painelFiltroAluno}.
+
+\begin{figure} [!ht]
+        \caption{Painel da Graduação - Filtragem por Situação do Aluno}
+        \begin{center}
+            \includegraphics[width=35em]{figuras/Capturar8.PNG}
+        \end{center}
+        
+        \label{fig:painelFiltroAluno}
+    \end{figure}
+
+Deve-se notar que no momento em que há uma seleção por um dos \textit{Pie Chart's}, além dos outros gráficos, o conteúdo dos outros \textit{Pie Chart's} também são atualizados de acordo com a seleção. Uma \textit{feature} que poderia ser adicionada é a seleção de mais de uma fatia do \textit{Pie Chart} quando este tiver mais de duas opções. Como a seleção de uma única fatia é um comportamento padrão da biblioteca do \textit{Highcharts}, e o objetivo deste trabalho é mostrar as possibilidades do que pode ser feito, a alteração desse comportamento não foi priorizada, mantendo a seleção básica para avaliações iniciais. 
+
+\section{Análise dos dados: Gráficos de Créditos Matriculados e Aproveitamento do Curso }
+
+Os primeiros dois gráficos mostram as informações referente aos dados das matriculas e desempenho dos alunos. O primeiro mostra a quantidade de créditos cada aluno se matricula por semestre mostrando também a média da turma de ingresso (Figura \ref{fig:numCred}).
+
+\begin{figure} [!ht]
+        \caption{Número de Créditos Matriculados por Semestre}
+        \begin{center}
+            \includegraphics[width=35em]{figuras/Capturar9.PNG}
+        \end{center}
+        
+        \label{fig:numCred}
+    \end{figure}
+
+É um dos primeiros gráficos que podem demonstrar o comportamento geral dos alunos selecionado quanto ao número de créditos que eles tendem a se matricular. Essa visualização também poderia ser feita pelo número de disciplinas matriculadas, o que seria equivalente. Ao selecionar somente um aluno, este gráfico mostra a linha do aluno em comparação com a média da turma previamente apresentada. Como é apresentado na Figura \ref{fig:numCredAluno}, essa visualização mostraria como esse aluno se comporta na matrícula em relação aos demais, pegando mais ou menos créditos em relação à média.
+
+
+\begin{figure} [!ht]
+        \caption{Número de Créditos Matriculados por Semestre - seleção de um aluno}
+        \begin{center}
+            \includegraphics[width=35em]{figuras/Capturar10.PNG}
+        \end{center}
+        
+        \label{fig:numCredAluno}
+    \end{figure}
+
+
+A outra visualização para este gráfico está na Figura \ref{fig:numCredMulher2010}. Nela foi filtrado a amostra de alunos por algum dos \textit{Pie Chart's}, de forma que agora além das linhas dos alunos e da média geral da turma de ingresso, ainda aparece a linha da média de créditos desse subgrupo selecionado. No caso da imagem, foi seleciona mulheres do curso com ingresso em 2010/1.
+
+
+\begin{figure} [!ht]
+        \caption{Número de Créditos Matriculados por Semestre - seleção de mulheres de 2010/1}
+        \begin{center}
+            \includegraphics[width=35em]{figuras/Capturar11.PNG}
+        \end{center}
+        
+        \label{fig:numCredMulher2010}
+    \end{figure}
+
+
+O segundo gráfico mostra as quantidades de disciplinas aprovadas, reprovadas , canceladas e com conceito FF em cada semestre (Figura \ref{fig:graphAprovMedio}). Para a visualização de mais de um aluno, é apresentado a média de conceito. Para a visualização de um único aluno, aparece a quantidade total de disciplinas para cada caso (Figura \ref{fig:graphAprovAluno}).
+
+\begin{figure} [!ht]
+        \caption{Gráfico de Aproveitamento de Curso - Média de Disciplinas da turma}
+        \begin{center}
+            \includegraphics[width=35em]{figuras/Capturar12.PNG}
+        \end{center}
+        
+        \label{fig:graphAprovMedio}
+    \end{figure}
+
+\begin{figure} [!ht]
+        \caption{Gráfico de Aproveitamento de Curso - Disciplinas do aluno}
+        \begin{center}
+            \includegraphics[width=35em]{figuras/Capturar13.PNG}
+        \end{center}
+        
+        \label{fig:graphAprovAluno}
+    \end{figure}
+
+
+
+\chapter{Avaliação e Discussão}  
+\chapter{Conclusão e Possíveis Extensões de Trabalho}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliographystyle{abntex2-alf}
+\bibliography{reference}
+
+\end{document}

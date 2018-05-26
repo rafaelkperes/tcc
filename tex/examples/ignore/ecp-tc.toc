@@ -1,0 +1,12 @@
+\contentsline {section}{\numberline {0.1}0pt}{1}{section.0.1}
+\contentsline {subsection}{\numberline {0.1.1}0pt}{1}{subsection.0.1.1}
+\contentsline {subsubsection}{\numberline {0.1.1.1}0pt}{1}{subsubsection.0.1.1.1}
+\contentsline {paragraph}{\numberline {0.1.1.1.1}0pt}{1}{paragraph.0.1.1.1.1}
+\select@language {english}
+\select@language {brazilian}
+\select@language {english}
+\contentsline {chapter}{1~Introdu\IeC {\c c}\IeC {\~a}o}{11}{CHAPTER.1}
+\contentsline {section}{\numberline {1.1}Figuras e tabelas}{11}{section.1.1}
+\contentsline {subsection}{\numberline {1.1.1}Formato de Figuras}{12}{subsection.1.1.1}
+\contentsline {subsection}{\numberline {1.1.2}Classifica\IeC {\c c}\IeC {\~a}o dos etc.}{12}{subsection.1.1.2}
+\contentsline {section}{\numberline {1.2}Sobre as refer\IeC {\^e}ncias bibliogr\IeC {\'a}ficas}{12}{section.1.2}
