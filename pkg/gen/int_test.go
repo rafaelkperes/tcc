@@ -12,7 +12,9 @@ func TestRandUint64s(t *testing.T) {
 	res := randUint64s(100, 5, 10)
 	r.Len(res, 100)
 	for _, val := range res {
-		r.LessOrEqual(uint64(5), val)
-		r.GreaterOrEqual(uint64(10), val)
+		r.True(val >= 5 && val <= 10)
+		// Not yet released by testify
+		// r.LessOrEqual(uint64(5), val)
+		// r.GreaterOrEqual(uint64(10), val)
 	}
 }

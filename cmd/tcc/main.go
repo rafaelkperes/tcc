@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/rafaelkperes/tcc/src/gen"
+	"github.com/rafaelkperes/tcc/pkg/gen"
 )
 
 const (

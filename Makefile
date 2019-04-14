@@ -9,24 +9,26 @@ GOINSTALL=$(GOCMD) install
 GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
+GODEP=dep
 
-SRC_DIR=./src
+SRC_DIR=.
 BIN_DIR=./bin
 DATA_DIR=./data
-CMD_DIR=$(SRC_DIR)/cmd
+VENDOR_DIR=./vendor 
+CMD_DIR=$(SRC_DIR)/cmd/tcc
 
 BINARY_NAME=tcc
 BINARY_UNIX=$(BINARY_NAME)_unix
 
 all: test build
 
-build: $(BIN_DIR)
+build: $(BIN_DIR) $(VENDOR_DIR)
 	$(GOBUILD) -o $(BIN_DIR)/$(BINARY_NAME) -v $(CMD_DIR)
 
-install:
+install: $(VENDOR_DIR)
 	$(GOINSTALL) -o $(BINARY_NAME) -v $(CMD_DIR)
 
-test: 
+test: $(VENDOR_DIR)
 	$(GOTEST) -v $(SRC_DIR)/...
 
 clean: 
@@ -36,6 +38,9 @@ clean:
 
 run: build $(DATA_DIR)
 	$(BIN_DIR)/$(BINARY_NAME)
+
+$(VENDOR_DIR):
+	$(GODEP) ensure
 
 # run gen
 $(DATA_DIR): build

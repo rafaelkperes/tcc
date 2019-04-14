@@ -25,17 +25,17 @@ func All(dst string, size int) error {
 
 	err = writeData(filepath.Join(dst, smallIntsFile), smallInts(size))
 	if err != nil {
-		errors.Wrap(err, "failed to write small ints")
+		return errors.Wrap(err, "failed to write small ints")
 	}
 
 	err = writeData(filepath.Join(dst, bigIntsFile), bigInts(size))
 	if err != nil {
-		errors.Wrap(err, "failed to write small ints")
+		return errors.Wrap(err, "failed to write small ints")
 	}
 
 	err = writeData(filepath.Join(dst, allIntsFile), allInts(size))
 	if err != nil {
-		errors.Wrap(err, "failed to write small ints")
+		return errors.Wrap(err, "failed to write small ints")
 	}
 
 	return nil
