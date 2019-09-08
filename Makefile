@@ -9,7 +9,6 @@ GOINSTALL=$(GOCMD) install
 GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
-GODEP=dep
 
 SRC_DIR=.
 BIN_DIR=./bin
@@ -38,9 +37,6 @@ clean:
 
 run: build $(DATA_DIR)
 	$(BIN_DIR)/$(BINARY_NAME)
-
-$(VENDOR_DIR):
-	$(GODEP) ensure
 
 # run gen
 $(DATA_DIR): build
