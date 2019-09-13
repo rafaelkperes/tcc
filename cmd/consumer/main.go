@@ -3,8 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
+	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/rafaelkperes/tcc/internal/svc/cons"
 )
 
 const (
@@ -14,6 +18,7 @@ const (
 var execName = filepath.Base(os.Args[0])
 
 var help = flag.Bool("h", false, "display this help")
+var port = flag.Int("p", 9000, "set consumer port")
 
 func main() {
 	flag.Parse()
@@ -23,22 +28,13 @@ func main() {
 		os.Exit(0)
 	}
 
-	if flag.NArg() < 1 {
-		fmt.Fprintf(flag.CommandLine.Output(), "expected a single argument, got %d arguments\n\n", flag.NArg())
-		displayHelp()
-		os.Exit(2)
-	}
+	cfg := &cons.Config{}
 
-	switch flag.Arg(0) {
-	default:
-		fmt.Fprintf(flag.CommandLine.Output(), "unexpected argument '%s'\n\n", flag.Arg(0))
-		displayHelp()
-		os.Exit(2)
-	}
+	log.Printf("listen and serve at port %d", *port)
+	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), cons.NewConsumerServer(cfg))
+	log.Fatal(err)
 }
 
 func displayHelp() {
-	w := flag.CommandLine.Output()
-	fmt.Fprintln(w, "additional flags:")
 	flag.PrintDefaults()
 }

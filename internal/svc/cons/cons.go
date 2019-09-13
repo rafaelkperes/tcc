@@ -3,6 +3,7 @@ package cons
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 
 	"github.com/rafaelkperes/tcc/pkg/data"
@@ -35,11 +36,14 @@ func newSrv(cfg *Config) *srv {
 }
 
 func (s *srv) handleRoot(w http.ResponseWriter, r *http.Request) {
+	log.Print("handleRoot")
+
 	m := NewMeasures()
 	m.ReceivedRequest()
 
 	payload, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		log.Printf("failed to read body: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -50,11 +54,13 @@ func (s *srv) handleRoot(w http.ResponseWriter, r *http.Request) {
 	// TODO: change to generic unmarshalling
 	err = json.Unmarshal(payload, &d)
 	if err != nil {
+		log.Printf("failed to unmarshal: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	m.Desserialized()
 
+	log.Printf("respond with measures: %s", string(m.ToJSON()))
 	w.WriteHeader(http.StatusOK)
 	w.Write(m.ToJSON())
 }
