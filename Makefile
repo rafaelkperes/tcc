@@ -12,18 +12,20 @@ GOGET=$(GOCMD) get
 
 SRC_DIR=.
 BIN_DIR=./bin
-CMD_DIR=$(SRC_DIR)/cmd/tcc
+CMD_DIR=$(SRC_DIR)/cmd
 
 all: test build
 
-consumer: $(BIN_DIR)
-	$(GOBUILD) -o $(BIN_DIR)/consumer -v $(CMD_DIR)
+consumer:
+	$(MKDIR_P) $(BIN_DIR)
+	$(GOBUILD) -o $(BIN_DIR)/consumer -v $(CMD_DIR)/consumer
 
-producer: $(BIN_DIR)
-	$(GOBUILD) -o $(BIN_DIR)/producer -v $(CMD_DIR)
+producer:
+	$(MKDIR_P) $(BIN_DIR)
+	$(GOBUILD) -o $(BIN_DIR)/producer -v $(CMD_DIR)/producer
 
 install:
-	$(GOINSTALL) -o $(BINARY_NAME) -v $(CMD_DIR)
+	$(GOINSTALL) -o $(BINARY_NAME) -v $(CMD_DIR)/...
 
 test:
 	$(GOTEST) -v $(SRC_DIR)/...
@@ -37,4 +39,4 @@ run: build $(DATA_DIR)
 	$(BIN_DIR)/$(BINARY_NAME)
 
 $(BIN_DIR):
-	$(MKDIR_P) $(BIN_DIR)
+	

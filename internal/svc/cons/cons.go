@@ -3,10 +3,12 @@ package cons
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
+	"time"
 
 	"github.com/rafaelkperes/tcc/pkg/data"
+	"github.com/rafaelkperes/tcc/pkg/measure"
+	log "github.com/sirupsen/logrus"
 )
 
 type Config struct {
@@ -18,15 +20,12 @@ func NewConsumerServer(cfg *Config) http.Handler {
 
 type srv struct {
 	*http.ServeMux
-
-	cfg *Config
 }
 
 func newSrv(cfg *Config) *srv {
 	mux := http.NewServeMux()
 	s := &srv{
 		ServeMux: mux,
-		cfg:      cfg,
 	}
 
 	// register routes
@@ -36,31 +35,49 @@ func newSrv(cfg *Config) *srv {
 }
 
 func (s *srv) handleRoot(w http.ResponseWriter, r *http.Request) {
-	log.Print("handleRoot")
+	logger := log.WithFields(log.Fields{
+		"handler": "root",
+		"time":    time.Now(),
+	})
 
-	m := NewMeasures()
-	m.ReceivedRequest()
+	m := measure.NewMeasure()
+	m.Add("recv")
 
 	payload, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Printf("failed to read body: %v", err)
+		logger.WithFields(log.Fields{"event": "readRequestBody", "error": err, "args": r.Body}).
+			Error("failed to read body")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	m.ReceivedBody()
+	m.Add("rbod")
 
 	d := data.Strings{}
 
 	// TODO: change to generic unmarshalling
 	err = json.Unmarshal(payload, &d)
 	if err != nil {
-		log.Printf("failed to unmarshal: %v", err)
+		logger.WithFields(log.Fields{"event": "unmarshalRequestBody", "error": err, "args": []interface{}{payload, &d}}).
+			Error("failed to unmarshal body")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	m.Desserialized()
+	m.Add("dsrl")
 
-	log.Printf("respond with measures: %s", string(m.ToJSON()))
+	obj := m.AsObject()
+	log.WithFields(log.Fields{"event": "measured", "measures": obj}).
+		Info("add measures to response")
+
+	j, err := json.Marshal(obj)
+	if err != nil {
+		logger.WithFields(log.Fields{"event": "marshalMeasures", "error": err, "args": obj}).
+			Error("failed to marshal measures")
+	}
+
 	w.WriteHeader(http.StatusOK)
-	w.Write(m.ToJSON())
+	_, err = w.Write(j)
+	if err != nil {
+		log.WithFields(log.Fields{"event": "writeResponseBody", "error": err, "args": j}).
+			Error("failed to write response body")
+	}
 }

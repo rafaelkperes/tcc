@@ -3,35 +3,52 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
+	"io"
 	"net/http"
 	"os"
-	"path/filepath"
 
 	"github.com/rafaelkperes/tcc/internal/svc/cons"
+	log "github.com/sirupsen/logrus"
 )
 
-const (
-	helpArg = "help"
+var (
+	help = flag.Bool("h", false, "display this help")
+	port = flag.Int("p", 9000, "set consumer port")
+	lf   = flag.String("lf", "/var/log/consumer.std.log", "standard logs file")
 )
-
-var execName = filepath.Base(os.Args[0])
-
-var help = flag.Bool("h", false, "display this help")
-var port = flag.Int("p", 9000, "set consumer port")
 
 func main() {
+	// flag-related init
 	flag.Parse()
-
 	if *help {
 		displayHelp()
 		os.Exit(0)
 	}
 
-	cfg := &cons.Config{}
+	// setup logging
+	log.SetFormatter(&log.JSONFormatter{})
+	log.SetOutput(os.Stderr)
 
-	log.Printf("listen and serve at port %d", *port)
-	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), cons.NewConsumerServer(cfg))
+	f, err := os.OpenFile(*lf, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.WithFields(log.Fields{"event": "setupLogger", "error": err}).
+			Error("failed to open log file")
+	} else {
+		log.SetOutput(io.MultiWriter(log.StandardLogger().Out, f))
+	}
+
+	// build measure logger
+	// w = os.Stderr
+	// f, err = os.OpenFile(*mf, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	// if err == nil {
+	// 	w = io.MultiWriter(w, f)
+	// }
+	// msrLogger := log.New()
+	// msrLogger.SetOutput(w)
+	// msrLogger.SetFormatter(&log.JSONFormatter{})
+
+	log.WithFields(log.Fields{"port": *port}).Infof("listen and serve at port %d", *port)
+	err = http.ListenAndServe(fmt.Sprintf(":%d", *port), cons.NewConsumerServer(&cons.Config{}))
 	log.Fatal(err)
 }
 
