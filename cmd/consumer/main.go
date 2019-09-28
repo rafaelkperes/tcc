@@ -37,18 +37,8 @@ func main() {
 		log.SetOutput(io.MultiWriter(log.StandardLogger().Out, f))
 	}
 
-	// build measure logger
-	// w = os.Stderr
-	// f, err = os.OpenFile(*mf, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	// if err == nil {
-	// 	w = io.MultiWriter(w, f)
-	// }
-	// msrLogger := log.New()
-	// msrLogger.SetOutput(w)
-	// msrLogger.SetFormatter(&log.JSONFormatter{})
-
 	log.WithFields(log.Fields{"port": *port}).Infof("listen and serve at port %d", *port)
-	err = http.ListenAndServe(fmt.Sprintf(":%d", *port), cons.NewConsumerServer(&cons.Config{}))
+	err = http.ListenAndServe(fmt.Sprintf(":%d", *port), cons.NewConsumerServer())
 	log.Fatal(err)
 }
 

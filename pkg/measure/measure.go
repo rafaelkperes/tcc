@@ -1,38 +1,40 @@
 package measure
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 )
 
 const (
-	prefix     = "msr"
 	timeFormat = time.RFC3339Nano
 )
 
-type Measure struct {
-	t map[string]time.Time
+type Measure map[string]time.Time
+
+func New() Measure {
+	return map[string]time.Time{"new": time.Now().UTC()}
 }
 
-func NewMeasure() *Measure {
-	return &Measure{
-		t: map[string]time.Time{fmt.Sprintf("%s.new", prefix): time.Now().UTC()},
+func (m Measure) Add(key string) {
+	m[key] = time.Now().UTC()
+}
+
+func (m Measure) AddMeasures(other Measure) {
+	for k, v := range other {
+		m[k] = v
 	}
 }
 
-func (m *Measure) Add(key string) {
-	m.t[fmt.Sprintf("%s.%s", prefix, key)] = time.Now().UTC()
-}
-
-func (m *Measure) AsObject() map[string]interface{} {
-	o := make(map[string]interface{}, len(m.t))
-	for k, v := range m.t {
+func (m Measure) AsObject() map[string]interface{} {
+	o := make(map[string]interface{}, len(m))
+	for k, v := range m {
 		o[k] = v.Format(timeFormat)
 	}
 	return o
 }
 
-func FromObject(o map[string]interface{}) (*Measure, error) {
+func FromObject(o map[string]interface{}) (Measure, error) {
 	t := make(map[string]time.Time, len(o))
 
 	var err error
@@ -49,5 +51,10 @@ func FromObject(o map[string]interface{}) (*Measure, error) {
 		}
 	}
 
-	return &Measure{t: t}, nil
+	return t, nil
+}
+
+func (m Measure) AsJSON() []byte {
+	b, _ := json.Marshal(m)
+	return b
 }

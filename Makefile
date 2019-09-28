@@ -14,7 +14,7 @@ SRC_DIR=.
 BIN_DIR=./bin
 CMD_DIR=$(SRC_DIR)/cmd
 
-all: test build
+all: consumer producer
 
 consumer:
 	$(MKDIR_P) $(BIN_DIR)

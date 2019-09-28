@@ -11,18 +11,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type Config struct {
-}
-
-func NewConsumerServer(cfg *Config) http.Handler {
-	return newSrv(cfg)
+func NewConsumerServer() http.Handler {
+	return newSrv()
 }
 
 type srv struct {
 	*http.ServeMux
 }
 
-func newSrv(cfg *Config) *srv {
+func newSrv() *srv {
 	mux := http.NewServeMux()
 	s := &srv{
 		ServeMux: mux,
@@ -40,7 +37,7 @@ func (s *srv) handleRoot(w http.ResponseWriter, r *http.Request) {
 		"time":    time.Now(),
 	})
 
-	m := measure.NewMeasure()
+	m := measure.New()
 	m.Add("recv")
 
 	payload, err := ioutil.ReadAll(r.Body)
@@ -52,12 +49,9 @@ func (s *srv) handleRoot(w http.ResponseWriter, r *http.Request) {
 	}
 	m.Add("rbod")
 
-	d := data.Strings{}
-
-	// TODO: change to generic unmarshalling
-	err = json.Unmarshal(payload, &d)
+	_, err = data.Unmarshal(payload, data.Type(r.Header.Get("x-data-type")), data.Format(r.Header.Get("Content-Type")))
 	if err != nil {
-		logger.WithFields(log.Fields{"event": "unmarshalRequestBody", "error": err, "args": []interface{}{payload, &d}}).
+		logger.WithFields(log.Fields{"event": "unmarshalRequestBody", "error": err, "args": payload}).
 			Error("failed to unmarshal body")
 		w.WriteHeader(http.StatusBadRequest)
 		return
