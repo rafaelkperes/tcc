@@ -6,6 +6,14 @@ import (
 	"math"
 	"math/rand"
 
+	"github.com/hamba/avro"
+
+	"github.com/ugorji/go/codec"
+
+	"github.com/golang/protobuf/proto"
+
+	"github.com/rafaelkperes/tcc/pkg/data/pbdata"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -51,6 +59,86 @@ func Unmarshal(d []byte, typ Type, format Format) (Data, error) {
 		default:
 			return nil, fmt.Errorf("unknown type: %v", typ)
 		}
+	// protobuf needs to map between proto generated types and the actual ones
+	case FormatProtobuf:
+		switch typ {
+		case TypeInt:
+			var v pbdata.Ints
+			err := proto.Unmarshal(d, &v)
+			return Ints(v.GetInts()), err
+		case TypeFloat:
+			var v pbdata.Floats
+			err := proto.Unmarshal(d, &v)
+			return Floats(v.GetFloats()), err
+		case TypeString:
+			var v pbdata.Strings
+			err := proto.Unmarshal(d, &v)
+			return Strings(v.GetStrings()), err
+		case TypeObject:
+			var v pbdata.Objects
+			err := proto.Unmarshal(d, &v)
+			pbObjs := v.GetObjects()
+			res := make(Objects, len(pbObjs))
+			for idx, pbo := range pbObjs {
+				res[idx] = Object{
+					B: pbo.B,
+					F: pbo.F,
+					I: pbo.I,
+					S: pbo.S,
+					T: pbo.T,
+				}
+			}
+			return res, err
+		default:
+			return nil, fmt.Errorf("unknown type: %v", typ)
+		}
+		// protobuf needs to map between proto generated types and the actual ones
+	case FormatMsgpack:
+		switch typ {
+		case TypeInt:
+			var v Ints
+			dec := codec.NewDecoderBytes(d, &msgpHandle)
+			err := dec.Decode(&v)
+			return v, err
+		case TypeFloat:
+			var v Floats
+			dec := codec.NewDecoderBytes(d, &msgpHandle)
+			err := dec.Decode(&v)
+			return v, err
+		case TypeString:
+			var v Strings
+			dec := codec.NewDecoderBytes(d, &msgpHandle)
+			err := dec.Decode(&v)
+			return v, err
+		case TypeObject:
+			var v Objects
+			dec := codec.NewDecoderBytes(d, &msgpHandle)
+			err := dec.Decode(&v)
+			return v, err
+		default:
+			return nil, fmt.Errorf("unknown type: %v", typ)
+		}
+	case FormatAvro:
+		switch typ {
+		case TypeInt:
+			var v Ints
+			err := avro.Unmarshal(avroInts, d, &v)
+			return v, err
+		case TypeFloat:
+			var v Floats
+			err := avro.Unmarshal(avroFloats, d, &v)
+			return v, err
+		case TypeString:
+			var v Strings
+			err := avro.Unmarshal(avroStrings, d, &v)
+			return v, err
+		case TypeObject:
+			var v Objects
+			err := avro.Unmarshal(avroObjects, d, &v)
+			return v, err
+		default:
+			return nil, fmt.Errorf("unknown type: %v", typ)
+		}
 	default:
 		return nil, fmt.Errorf("unknown format: %v", format)
 	}
@@ -61,12 +149,17 @@ func CreateInts(total, min, max int64) Ints {
 	for idx := range r {
 		r[idx] = genInt(min, max)
 	}
+
+	var peak int64 = 5
+	if total < 5 {
+		peak = total
+	}
 	logrus.WithFields(map[string]interface{}{
 		"typ":    TypeInt,
 		"size":   total,
 		"intmin": min,
 		"intmax": max,
-		"head":   r[:5],
+		"head":   r[:peak],
 	}).Debug("created ints")
 	return r
 }
@@ -85,10 +178,15 @@ func CreateFloats(total int64) Floats {
 	for idx := range r {
 		r[idx] = rnd.NormFloat64()
 	}
+
+	var peak int64 = 5
+	if total < 5 {
+		peak = total
+	}
 	logrus.WithFields(map[string]interface{}{
 		"typ":  TypeInt,
 		"size": total,
-		"head": r[:5],
+		"head": r[:peak],
 	}).Debug("created floats")
 	return r
 }
@@ -99,11 +197,15 @@ func CreateStrings(total, length int64) Strings {
 		r[idx] = genString(length)
 	}
 
+	var peak int64 = 5
+	if total < 5 {
+		peak = total
+	}
 	logrus.WithFields(map[string]interface{}{
 		"typ":    TypeString,
 		"strlen": length,
 		"size":   total,
-		"head":   r[:5],
+		"head":   r[:peak],
 	}).Debug("created strings")
 	return r
 }
@@ -123,10 +225,15 @@ func CreateObjects(total int64) Objects {
 	for idx := range r {
 		r[idx] = genObject()
 	}
+
+	var peak int64 = 5
+	if total < 5 {
+		peak = total
+	}
 	logrus.WithFields(map[string]interface{}{
 		"typ":  TypeObject,
 		"size": total,
-		"head": r[:5],
+		"head": r[:peak],
 	}).Debug("created objects")
 	return r
 }

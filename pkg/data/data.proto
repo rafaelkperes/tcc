@@ -1,0 +1,29 @@
+syntax = "proto3";
+package data;
+option go_package = "pbdata";
+
+import "google/protobuf/timestamp.proto";
+
+message Ints {
+    repeated sint64 ints = 1;
+}
+
+message Floats {
+    repeated double floats = 1;
+}
+
+message Strings {
+    repeated string strings = 1;
+}
+
+message Objects {
+    message Object {
+        sint64 I = 1;
+        double F = 2;
+        bool T = 3;
+        string S = 4;
+        bytes B = 5;
+    }
+
+    repeated Object objects = 1;
+}
