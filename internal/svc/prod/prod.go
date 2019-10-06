@@ -29,7 +29,7 @@ func (p *Producer) Produce(payload data.Data, format data.Format, n int, interva
 	log.Debugf("requesting a total of %d requests every %d milliseconds to %s", n, interval.Milliseconds(), p.endpoint)
 
 	loop := func(idx int) {
-		log.Debugf("sending request %d/%d", idx, n)
+		log.WithField("event", "progress").Debugf("sending request %d/%d", idx+1, n)
 
 		m := measure.New()
 		m.Add("strt")
