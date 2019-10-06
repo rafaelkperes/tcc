@@ -55,6 +55,10 @@ func FromObject(o map[string]interface{}) (Measure, error) {
 }
 
 func (m Measure) AsJSON() []byte {
-	b, _ := json.Marshal(m)
+	b, _ := json.Marshal(m.AsObject())
 	return b
+}
+
+func (m Measure) String() string {
+	return string(m.AsJSON())
 }

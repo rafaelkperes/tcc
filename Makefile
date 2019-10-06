@@ -14,7 +14,7 @@ SRC_DIR=.
 BIN_DIR=./bin
 CMD_DIR=$(SRC_DIR)/cmd
 
-all: consumer producer
+all: consumer producer parser
 
 consumer:
 	$(MKDIR_P) $(BIN_DIR)
@@ -23,6 +23,10 @@ consumer:
 producer:
 	$(MKDIR_P) $(BIN_DIR)
 	$(GOBUILD) -o $(BIN_DIR)/producer -v $(CMD_DIR)/producer
+
+parser:
+	$(MKDIR_P) $(BIN_DIR)
+	$(GOBUILD) -o $(BIN_DIR)/parser -v $(CMD_DIR)/parser
 
 install:
 	$(GOINSTALL) -o $(BINARY_NAME) -v $(CMD_DIR)/...
