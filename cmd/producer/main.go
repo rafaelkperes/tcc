@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"io"
 	"math"
 	"os"
 	"time"
@@ -17,7 +16,6 @@ var (
 	help          = flag.Bool("h", false, "display this help")
 	format        = flag.String("f", string(data.FormatJSON), "format")
 	typ           = flag.String("t", string(data.TypeString), "data type")
-	lf            = flag.String("lf", "/var/log/std.producer.log", "log file")
 	endpoint      = flag.String("c", "http://localhost:9000", "set consumer endpoint")
 	noOfReqs      = flag.Int("r", 12, "number of total requests")
 	interval      = flag.Int("i", 0, "interval in milliseconds between concurrent requests; if 0, requests are done sequentially")
@@ -39,14 +37,6 @@ func main() {
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetOutput(os.Stderr)
 	log.SetLevel(log.DebugLevel)
-
-	f, err := os.OpenFile(*lf, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		log.WithFields(log.Fields{"event": "setupLogger", "error": err}).
-			Error("failed to open log file")
-	} else {
-		log.SetOutput(io.MultiWriter(log.StandardLogger().Out, f))
-	}
 
 	d, err := data.Create(data.Type(*typ), *payloadLength, *intMin, *intMax, *strLength)
 	if err != nil {
