@@ -21,14 +21,19 @@ import (
 // var src = rand.NewSource(time.Now().UnixNano())
 var src = rand.NewSource(88)
 
-func Create(typ Type, total, min, max, strlen int64) (Data, error) {
+func Create(typ Type, total int64, opts ...Option) (Data, error) {
+	options := newOptions()
+	for _, o := range opts {
+		o.apply(options)
+	}
+
 	switch typ {
 	case TypeInt:
-		return CreateInts(total, min, max), nil
+		return CreateInts(total, options.intMin, options.intMax), nil
 	case TypeFloat:
 		return CreateFloats(total), nil
 	case TypeString:
-		return CreateStrings(total, strlen), nil
+		return CreateStrings(total, options.strLen), nil
 	case TypeObject:
 		return CreateObjects(total), nil
 	default:

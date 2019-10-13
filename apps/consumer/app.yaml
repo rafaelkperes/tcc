@@ -1,0 +1,4 @@
+# Google App Engine app configuration
+runtime: go113
+
+main: github.com/rafaelkperes/tcc/cmd/consumer

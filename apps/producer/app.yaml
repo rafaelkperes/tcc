@@ -1,0 +1,7 @@
+# Google App Engine app configuration
+runtime: go113
+
+env_variables:
+  CONSUMER_ENDPOINT: "https://rkperes-consumer.appspot.com/"
+  RESULTS_DIR: "/tmp/producer/"
+main: github.com/rafaelkperes/tcc/cmd/producer

@@ -23,7 +23,7 @@ func TestDataMarshalling(t *testing.T) {
 				r := require.New(t)
 				etyp := TypeInt
 
-				is, err := Create(etyp, 5, 0, 10, 0)
+				is, err := Create(etyp, 5, WithInts(0, 10))
 				r.NoError(err)
 
 				m, typ, err := is.Marshal(format)
@@ -42,7 +42,7 @@ func TestDataMarshalling(t *testing.T) {
 				r := require.New(t)
 				etyp := TypeFloat
 
-				is, err := Create(etyp, 5, 0, 10, 0)
+				is, err := Create(etyp, 5)
 				r.NoError(err)
 
 				m, typ, err := is.Marshal(format)
@@ -61,7 +61,7 @@ func TestDataMarshalling(t *testing.T) {
 				r := require.New(t)
 				etyp := TypeString
 
-				is, err := Create(etyp, 5, 0, 0, 10)
+				is, err := Create(etyp, 5, WithStringLength(10))
 				r.NoError(err)
 
 				m, typ, err := is.Marshal(format)
@@ -80,7 +80,7 @@ func TestDataMarshalling(t *testing.T) {
 				r := require.New(t)
 				etyp := TypeObject
 
-				is, err := Create(etyp, 5, 0, 10, 10)
+				is, err := Create(etyp, 5, WithInts(0, 10), WithStringLength(10))
 				r.NoError(err)
 
 				m, typ, err := is.Marshal(format)

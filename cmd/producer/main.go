@@ -1,28 +1,34 @@
 package main
 
 import (
+	"bytes"
 	"flag"
-	"math"
+	"io"
+	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/rafaelkperes/tcc/internal/svc/prod"
 
 	"github.com/rafaelkperes/tcc/pkg/data"
+	"github.com/rafaelkperes/tcc/pkg/file"
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	defaultConsumerEndpoint = "http://localhost:9000"
+)
+
 var (
-	help          = flag.Bool("h", false, "display this help")
-	format        = flag.String("f", string(data.FormatJSON), "format")
-	typ           = flag.String("t", string(data.TypeString), "data type")
-	endpoint      = flag.String("c", "http://localhost:9000", "set consumer endpoint")
-	noOfReqs      = flag.Int("r", 12, "number of total requests")
-	interval      = flag.Int("i", 0, "interval in milliseconds between concurrent requests; if 0, requests are done sequentially")
-	payloadLength = flag.Int64("l", 1e6, "size of the array for the payload")
-	strLength     = flag.Int64("strlen", 100, "length of random strings")
-	intMin        = flag.Int64("intmin", 0, "minimun value for random integers")
-	intMax        = flag.Int64("intmax", math.MaxInt64, "maximum value for random integers")
+	defaultLogOutput = os.Stderr
+	defaultPort      = "9001"
+)
+
+var (
+	help = flag.Bool("h", false, "display this help")
 )
 
 func main() {
@@ -35,17 +41,108 @@ func main() {
 
 	// setup logging
 	log.SetFormatter(&log.JSONFormatter{})
-	log.SetOutput(os.Stderr)
+	log.SetOutput(defaultLogOutput)
 	log.SetLevel(log.DebugLevel)
 
-	d, err := data.Create(data.Type(*typ), *payloadLength, *intMin, *intMax, *strLength)
+	dir, ok := os.LookupEnv("RESULTS_DIR")
+	if !ok {
+		dir = "/tmp/tcc"
+		log.Warning("RESULTS_DIR not set")
+	}
+	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+		log.Fatalf("failed to create directory %s: %v", dir, err)
+	}
+
+	ep, ok := os.LookupEnv("CONSUMER_ENDPOINT")
+	if !ok {
+		log.Warning("CONSUMER_ENDPOINT not set")
+		ep = defaultConsumerEndpoint
+	}
+	go runAll(ep, dir)
+
+	// Set up file server
+	http.Handle("/", http.FileServer(http.Dir(dir)))
+	http.HandleFunc("/results.tar.gz", func(w http.ResponseWriter, r *http.Request) {
+		var b []byte
+		buff := bytes.NewBuffer(b)
+
+		if err := file.AsTarball(dir, buff); err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		if _, err := io.Copy(w, buff); err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+	})
+
+	port, ok := os.LookupEnv("PORT")
+	if !ok {
+		log.Warning("CONSUMER_ENDPOINT not set")
+		port = defaultPort
+	}
+	log.Printf("Serving %s on HTTP port: %s\n", dir, port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
+}
+
+func runAll(consumerEndpoint, dir string) {
+	formats := []data.Format{data.FormatJSON, data.FormatProtobuf, data.FormatMsgpack, data.FormatAvro}
+	types := []data.Type{data.TypeInt, data.TypeFloat, data.TypeString, data.TypeObject}
+
+	for idx, f := range formats {
+		for jdx, t := range types {
+			log := log.WithFields(map[string]interface{}{"format": f, "typ": t})
+
+			if err := setLoggingFile(dir, f, t); err != nil {
+				log.Error(err)
+			}
+
+			log.WithField("event", "progress").
+				Debugf("running with %d/%d settings", (idx)*len(types)+jdx+1, len(formats)*len(types))
+			run(consumerEndpoint, f, t)
+		}
+	}
+	log.Debug("finished")
+}
+
+func setLoggingFile(dir string, format data.Format, typ data.Type) error {
+	fns := strings.Split(string(format), "/")
+	fn := fns[len(fns)-1]
+
+	dir = filepath.Join(dir, fn)
+	err := os.MkdirAll(dir, os.ModePerm)
+	if err != nil {
+		return errors.Wrapf(err, "failed to create directory %s", dir)
+	}
+
+	filename := filepath.Join(dir, string(typ)+".log")
+	f, err := os.OpenFile(filename, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, os.ModePerm)
+	if err != nil {
+		return errors.Wrapf(err, "failed to open file %s", filename)
+	}
+
+	log.SetOutput(io.MultiWriter(defaultLogOutput, f))
+	return nil
+}
+
+func run(consumerEndpoint string, format data.Format, typ data.Type) {
+	const (
+		noOfReqs int           = 1
+		interval time.Duration = 0
+		total    int64         = 1
+	)
+
+	d, err := data.Create(typ, total)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	p := prod.NewProducer(*endpoint)
-	p.Produce(d, data.Format(*format), *noOfReqs, time.Duration(*interval)*time.Millisecond)
-
+	p := prod.NewProducer(consumerEndpoint)
+	p.Produce(d, format, noOfReqs, interval)
 	log.Debug("done")
 }
 
