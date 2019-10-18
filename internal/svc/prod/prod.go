@@ -80,6 +80,7 @@ func (p *Producer) Produce(payload data.Data, format data.Format, n int, interva
 		log.Debugf("got consumer measures: %v", cm.AsObject())
 
 		m.AddMeasures(cm)
+		m.Add("tend")
 		log.WithFields(map[string]interface{}{"event": "measured", "measures": m, "typ": typ, "format": format}).
 			Info("finished measures")
 	}

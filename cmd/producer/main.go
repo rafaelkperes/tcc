@@ -104,6 +104,8 @@ func runAll(consumerEndpoint, dir string) {
 			log.WithField("event", "progress").
 				Debugf("running with %d/%d settings", (idx)*len(types)+jdx+1, len(formats)*len(types))
 			run(consumerEndpoint, f, t)
+			log.WithField("event", "progress").
+				Debugf("done with %d/%d settings", (idx)*len(types)+jdx+1, len(formats)*len(types))
 		}
 	}
 	log.Debug("finished")
@@ -131,9 +133,9 @@ func setLoggingFile(dir string, format data.Format, typ data.Type) error {
 
 func run(consumerEndpoint string, format data.Format, typ data.Type) {
 	const (
-		noOfReqs int           = 1
+		noOfReqs int           = 1e2
 		interval time.Duration = 0
-		total    int64         = 1
+		total    int64         = 1e6
 	)
 
 	d, err := data.Create(typ, total)
@@ -143,7 +145,6 @@ func run(consumerEndpoint string, format data.Format, typ data.Type) {
 
 	p := prod.NewProducer(consumerEndpoint)
 	p.Produce(d, format, noOfReqs, interval)
-	log.Debug("done")
 }
 
 func displayHelp() {
