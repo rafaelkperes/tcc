@@ -20,6 +20,18 @@ producer -c "http://localhost:9000" &> p.log
 cat p.log | parser
 ```
 
+Producer measures are (in chronological order):
+1. `strt`: start
+2. `srld`: serialized data
+3. `sent`: sent data to consumer
+    1. the set of consumer measures is added
+4. `tend`: end
+
+Consumer measures are (in chronologicar order):
+1. `recv`: received request
+2. `rbod`: read whole body from request
+3. `dsrl`: deserialized received data
+
 ### Request parameters
 
 The single producer run may generate a number of requests `r` with a given interval `i` in milliseconds. The requests are started concurrently, unless `i` is `0` (its default value), which then generates sequential requests without an additional interval between them.

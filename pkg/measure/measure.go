@@ -26,6 +26,19 @@ func (m Measure) AddMeasures(other Measure) {
 	}
 }
 
+func (m Measure) Get(key string) (time.Time, bool) {
+	tt, ok := m[key]
+	return tt, ok
+}
+
+func (m Measure) GetString(key string) (string, bool) {
+	tt, ok := m[key]
+	if !ok {
+		return "", false
+	}
+	return tt.Format(timeFormat), ok
+}
+
 func (m Measure) AsObject() map[string]interface{} {
 	o := make(map[string]interface{}, len(m))
 	for k, v := range m {

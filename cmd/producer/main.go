@@ -1,25 +1,27 @@
 package main
 
 import (
-	"bytes"
 	"flag"
 	"io"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/pkg/errors"
 	"github.com/rafaelkperes/tcc/internal/svc/prod"
 
 	"github.com/rafaelkperes/tcc/pkg/data"
-	"github.com/rafaelkperes/tcc/pkg/file"
 	log "github.com/sirupsen/logrus"
 )
 
 const (
 	defaultConsumerEndpoint = "http://localhost:9000"
+
+	noOfReqs int           = 1
+	interval time.Duration = 0
+	total    int64         = 1
 )
 
 var (
@@ -58,35 +60,42 @@ func main() {
 		log.Warning("CONSUMER_ENDPOINT not set")
 		ep = defaultConsumerEndpoint
 	}
-	go runAll(ep, dir)
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		runAll(ep, dir)
+		wg.Done()
+	}()
+	wg.Wait()
 
 	// Set up file server
-	http.Handle("/", http.FileServer(http.Dir(dir)))
-	http.HandleFunc("/results.tar.gz", func(w http.ResponseWriter, r *http.Request) {
-		var b []byte
-		buff := bytes.NewBuffer(b)
+	// http.Handle("/", http.FileServer(http.Dir(dir)))
+	// http.HandleFunc("/results.tar.gz", func(w http.ResponseWriter, r *http.Request) {
+	// 	var b []byte
+	// 	buff := bytes.NewBuffer(b)
 
-		if err := file.AsTarball(dir, buff); err != nil {
-			log.Error(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+	// 	if err := file.AsTarball(dir, buff); err != nil {
+	// 		log.Error(err)
+	// 		w.WriteHeader(http.StatusInternalServerError)
+	// 		return
+	// 	}
 
-		if _, err := io.Copy(w, buff); err != nil {
-			log.Error(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		w.WriteHeader(http.StatusOK)
-	})
+	// 	if _, err := io.Copy(w, buff); err != nil {
+	// 		log.Error(err)
+	// 		w.WriteHeader(http.StatusInternalServerError)
+	// 		return
+	// 	}
+	// 	w.WriteHeader(http.StatusOK)
+	// })
 
-	port, ok := os.LookupEnv("PORT")
-	if !ok {
-		log.Warning("CONSUMER_ENDPOINT not set")
-		port = defaultPort
-	}
-	log.Printf("Serving %s on HTTP port: %s\n", dir, port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	// port, ok := os.LookupEnv("PORT")
+	// if !ok {
+	// 	log.Warning("CONSUMER_ENDPOINT not set")
+	// 	port = defaultPort
+	// }
+	// log.Printf("Serving %s on HTTP port: %s\n", dir, port)
+	// log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 func runAll(consumerEndpoint, dir string) {
@@ -97,9 +106,9 @@ func runAll(consumerEndpoint, dir string) {
 		for jdx, t := range types {
 			log := log.WithFields(map[string]interface{}{"format": f, "typ": t})
 
-			if err := setLoggingFile(dir, f, t); err != nil {
-				log.Error(err)
-			}
+			// if err := setLoggingFile(dir, f, t); err != nil {
+			// 	log.Error(err)
+			// }
 
 			log.WithField("event", "progress").
 				Debugf("running with %d/%d settings", (idx)*len(types)+jdx+1, len(formats)*len(types))
@@ -132,12 +141,6 @@ func setLoggingFile(dir string, format data.Format, typ data.Type) error {
 }
 
 func run(consumerEndpoint string, format data.Format, typ data.Type) {
-	const (
-		noOfReqs int           = 1e2
-		interval time.Duration = 0
-		total    int64         = 1e6
-	)
-
 	d, err := data.Create(typ, total)
 	if err != nil {
 		log.Fatal(err.Error())
