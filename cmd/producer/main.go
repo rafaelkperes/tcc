@@ -1,13 +1,16 @@
 package main
 
 import (
+	"context"
 	"flag"
+	"fmt"
 	"io"
+	"io/ioutil"
+	"net/http"
 	"os"
-	"path/filepath"
-	"strings"
-	"sync"
 	"time"
+
+	"cloud.google.com/go/storage"
 
 	"github.com/pkg/errors"
 	"github.com/rafaelkperes/tcc/internal/svc/prod"
@@ -18,10 +21,11 @@ import (
 
 const (
 	defaultConsumerEndpoint = "http://localhost:9000"
+	bucketName              = "evident-beacon-256523.appspot.com"
 
-	noOfReqs int           = 1
+	noOfReqs int           = 1e2
 	interval time.Duration = 0
-	total    int64         = 1
+	total    int64         = 1e6
 )
 
 var (
@@ -30,7 +34,8 @@ var (
 )
 
 var (
-	help = flag.Bool("h", false, "display this help")
+	help    = flag.Bool("h", false, "display this help")
+	started = false
 )
 
 func main() {
@@ -43,16 +48,70 @@ func main() {
 
 	// setup logging
 	log.SetFormatter(&log.JSONFormatter{})
-	log.SetOutput(defaultLogOutput)
 	log.SetLevel(log.DebugLevel)
 
-	dir, ok := os.LookupEnv("RESULTS_DIR")
+	ep, ok := os.LookupEnv("CONSUMER_ENDPOINT")
 	if !ok {
-		dir = "/tmp/tcc"
-		log.Warning("RESULTS_DIR not set")
+		log.Warning("CONSUMER_ENDPOINT not set")
+		ep = defaultConsumerEndpoint
 	}
-	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
-		log.Fatalf("failed to create directory %s: %v", dir, err)
+
+	ff, err := ioutil.TempFile("", "")
+	if err != nil {
+		log.Fatal(errors.Wrap(err, "failed to open log file"))
+	}
+
+	// prepare GCS metadata
+	ctx := context.Background()
+	// ctx := appengine.NewContext(r)
+	log.SetOutput(io.MultiWriter(defaultLogOutput, ff))
+
+	// bucketName, err := aefile.DefaultBucketName(context.Background())
+	// if err != nil {
+	// 	err = errors.Wrap(err, "failed to get default GCS bucket name")
+	// 	log.Error(err)
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	_, _ = w.Write([]byte(err.Error())) // ignore error
+	// 	return
+	// }
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatal(errors.Wrap(err, "failed to create GCS client"))
+	}
+	runAll(ep)
+
+	log.SetOutput(defaultLogOutput)
+	defer ff.Close()
+	_, err = ff.Seek(0, 0)
+	if err != nil {
+		log.Errorf("failed to seek: %v", err)
+	}
+
+	basename := fmt.Sprintf("%s-producer.log", time.Now().Format(time.RFC3339))
+	ow := client.Bucket(bucketName).Object(basename).NewWriter(ctx)
+	defer ow.Close()
+
+	_, err = io.Copy(ow, ff)
+	if err != nil {
+		log.Errorf("failed to copy to GCS: %v", err)
+	}
+
+	// Set up file server
+	// http.HandleFunc("/", startHandler)
+
+	// port, ok := os.LookupEnv("PORT")
+	// if !ok {
+	// 	log.Warning("PORT not set")
+	// 	port = defaultPort
+	// }
+	// log.Printf("serving on HTTP port: %s", port)
+	// log.Fatal(http.ListenAndServe(":"+port, nil))
+}
+
+func startHandler(w http.ResponseWriter, r *http.Request) {
+	if started {
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	ep, ok := os.LookupEnv("CONSUMER_ENDPOINT")
@@ -61,54 +120,66 @@ func main() {
 		ep = defaultConsumerEndpoint
 	}
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
+	ff, err := ioutil.TempFile("", "")
+	if err != nil {
+		err = errors.Wrap(err, "failed to open log file")
+		log.Error(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(err.Error())) // ignore error
+		return
+	}
+
+	// prepare GCS metadata
+	ctx := context.Background()
+	// ctx := appengine.NewContext(r)
+	log.SetOutput(io.MultiWriter(defaultLogOutput, ff))
+
+	// start producer
 	go func() {
-		runAll(ep, dir)
-		wg.Done()
+		// bucketName, err := aefile.DefaultBucketName(context.Background())
+		// if err != nil {
+		// 	err = errors.Wrap(err, "failed to get default GCS bucket name")
+		// 	log.Error(err)
+		// 	w.WriteHeader(http.StatusInternalServerError)
+		// 	_, _ = w.Write([]byte(err.Error())) // ignore error
+		// 	return
+		// }
+		bucketName := "evident-beacon-256523.appspot.com"
+		client, err := storage.NewClient(ctx)
+		if err != nil {
+			err = errors.Wrap(err, "failed to create GCS client")
+			log.Error(err)
+		}
+		runAll(ep)
+
+		log.SetOutput(defaultLogOutput)
+		defer ff.Close()
+		_, err = ff.Seek(0, 0)
+		if err != nil {
+			log.Errorf("failed to seek: %v", err)
+		}
+
+		basename := fmt.Sprintf("%s-producer.log", time.Now().Format(time.RFC3339))
+		ow := client.Bucket(bucketName).Object(basename).NewWriter(ctx)
+		defer ow.Close()
+
+		_, err = io.Copy(ow, ff)
+		if err != nil {
+			log.Errorf("failed to copy to GCS: %v", err)
+		}
 	}()
-	wg.Wait()
 
-	// Set up file server
-	// http.Handle("/", http.FileServer(http.Dir(dir)))
-	// http.HandleFunc("/results.tar.gz", func(w http.ResponseWriter, r *http.Request) {
-	// 	var b []byte
-	// 	buff := bytes.NewBuffer(b)
-
-	// 	if err := file.AsTarball(dir, buff); err != nil {
-	// 		log.Error(err)
-	// 		w.WriteHeader(http.StatusInternalServerError)
-	// 		return
-	// 	}
-
-	// 	if _, err := io.Copy(w, buff); err != nil {
-	// 		log.Error(err)
-	// 		w.WriteHeader(http.StatusInternalServerError)
-	// 		return
-	// 	}
-	// 	w.WriteHeader(http.StatusOK)
-	// })
-
-	// port, ok := os.LookupEnv("PORT")
-	// if !ok {
-	// 	log.Warning("CONSUMER_ENDPOINT not set")
-	// 	port = defaultPort
-	// }
-	// log.Printf("Serving %s on HTTP port: %s\n", dir, port)
-	// log.Fatal(http.ListenAndServe(":"+port, nil))
+	started = true
+	w.WriteHeader(http.StatusOK)
 }
 
-func runAll(consumerEndpoint, dir string) {
+func runAll(consumerEndpoint string) {
 	formats := []data.Format{data.FormatJSON, data.FormatProtobuf, data.FormatMsgpack, data.FormatAvro}
 	types := []data.Type{data.TypeInt, data.TypeFloat, data.TypeString, data.TypeObject}
 
 	for idx, f := range formats {
 		for jdx, t := range types {
 			log := log.WithFields(map[string]interface{}{"format": f, "typ": t})
-
-			// if err := setLoggingFile(dir, f, t); err != nil {
-			// 	log.Error(err)
-			// }
 
 			log.WithField("event", "progress").
 				Debugf("running with %d/%d settings", (idx)*len(types)+jdx+1, len(formats)*len(types))
@@ -118,26 +189,6 @@ func runAll(consumerEndpoint, dir string) {
 		}
 	}
 	log.Debug("finished")
-}
-
-func setLoggingFile(dir string, format data.Format, typ data.Type) error {
-	fns := strings.Split(string(format), "/")
-	fn := fns[len(fns)-1]
-
-	dir = filepath.Join(dir, fn)
-	err := os.MkdirAll(dir, os.ModePerm)
-	if err != nil {
-		return errors.Wrapf(err, "failed to create directory %s", dir)
-	}
-
-	filename := filepath.Join(dir, string(typ)+".log")
-	f, err := os.OpenFile(filename, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, os.ModePerm)
-	if err != nil {
-		return errors.Wrapf(err, "failed to open file %s", filename)
-	}
-
-	log.SetOutput(io.MultiWriter(defaultLogOutput, f))
-	return nil
 }
 
 func run(consumerEndpoint string, format data.Format, typ data.Type) {

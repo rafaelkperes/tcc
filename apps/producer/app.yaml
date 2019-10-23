@@ -2,9 +2,8 @@
 runtime: go113
 
 env_variables:
-  CONSUMER_ENDPOINT: "https://rkperes-consumer.appspot.com/"
+  CONSUMER_ENDPOINT: "https://stellar-ether-256523.appspot.com//"
   RESULTS_DIR: "/tmp/producer/"
 main: github.com/rafaelkperes/tcc/cmd/producer
-basic_scaling:
-  max_instances: 1
-  idle_timeout: 60m
+manual_scaling:
+  instances: 1

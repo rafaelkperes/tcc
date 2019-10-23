@@ -81,7 +81,7 @@ func (p *Producer) Produce(payload data.Data, format data.Format, n int, interva
 
 		m.AddMeasures(cm)
 		m.Add("tend")
-		log.WithFields(map[string]interface{}{"event": "measured", "measures": m, "typ": typ, "format": format}).
+		log.WithFields(map[string]interface{}{"event": "measured", "datasize": len(b), "measures": m, "typ": typ, "format": format}).
 			Info("finished measures")
 	}
 
