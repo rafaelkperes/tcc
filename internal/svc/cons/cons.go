@@ -26,6 +26,9 @@ func newSrv() *srv {
 	}
 
 	// register routes
+	mux.HandleFunc("/_ah/start", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
 	mux.HandleFunc("/", s.handleRoot)
 
 	return s

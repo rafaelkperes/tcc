@@ -2,8 +2,10 @@
 runtime: go113
 
 env_variables:
-  CONSUMER_ENDPOINT: "https://stellar-ether-256523.appspot.com//"
+  CONSUMER_ENDPOINT: "https://rkperes-consumer-0.appspot.com"
   RESULTS_DIR: "/tmp/producer/"
+  RUN_ID: "real4"
 main: github.com/rafaelkperes/tcc/cmd/producer
+instance_class: B4_HIGHMEM
 manual_scaling:
   instances: 1

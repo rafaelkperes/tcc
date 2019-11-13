@@ -26,10 +26,10 @@ func NewProducer(consumerEndpoint string) *Producer {
 }
 
 func (p *Producer) Produce(payload data.Data, format data.Format, n int, interval time.Duration) {
-	log.Debugf("requesting a total of %d requests every %d milliseconds to %s", n, interval.Milliseconds(), p.endpoint)
+	// log.Debugf("requesting a total of %d requests every %d milliseconds to %s", n, interval.Milliseconds(), p.endpoint)
 
 	loop := func(idx int) {
-		log.WithField("event", "progress").Debugf("sending request %d/%d", idx+1, n)
+		//log.WithField("event", "progress").Debugf("sending request %d/%d", idx+1, n)
 
 		m := measure.New()
 		m.Add("strt")
@@ -68,7 +68,7 @@ func (p *Producer) Produce(payload data.Data, format data.Format, n int, interva
 		obj := make(map[string]interface{})
 		err = json.Unmarshal(rb, &obj)
 		if err != nil {
-			log.Errorf("failed to unmarshal consumer measures: %v", err)
+			log.WithField("rawValue", string(rb)).Errorf("failed to unmarshal consumer measures: %v", err)
 			return
 		}
 
@@ -77,7 +77,7 @@ func (p *Producer) Produce(payload data.Data, format data.Format, n int, interva
 			log.Errorf("failed to parse consumer measures: %v", err)
 			return
 		}
-		log.Debugf("got consumer measures: %v", cm.AsObject())
+		// log.Debugf("got consumer measures: %v", cm.AsObject())
 
 		m.AddMeasures(cm)
 		m.Add("tend")

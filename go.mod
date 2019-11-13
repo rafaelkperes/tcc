@@ -10,5 +10,6 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/stretchr/testify v1.4.0
 	github.com/ugorji/go/codec v1.1.7
+	google.golang.org/api v0.9.0
 	google.golang.org/appengine v1.6.5
 )
