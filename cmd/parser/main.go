@@ -27,7 +27,6 @@ import (
 
 const (
 	timeFormat = time.RFC3339Nano
-	bucketName = "rkperes-storage"
 )
 
 var (
@@ -45,6 +44,8 @@ type entry struct {
 }
 
 func main() {
+	log.SetLevel(log.DebugLevel)
+
 	// flag-related init
 	flag.Parse()
 	if *help {
@@ -65,6 +66,7 @@ func main() {
 	var opts []option.ClientOption
 	if len(auth) > 0 {
 		// use auth key
+		log.Info("using auth parameter")
 		opts = append(opts, option.WithCredentialsFile(auth))
 	}
 	ctx := context.Background()
@@ -84,13 +86,14 @@ func main() {
 }
 
 func readAll(ctx context.Context, client *storage.Client, bucket, prefix string, buff io.Writer) error {
-	it := client.Bucket(bucketName).Objects(ctx, &storage.Query{Prefix: prefix})
+	log.Infof("read from bucket %s with prefix %s", bucket, prefix)
+	it := client.Bucket(bucket).Objects(ctx, &storage.Query{Prefix: prefix})
 	for obj, err := it.Next(); err != iterator.Done; obj, err = it.Next() {
 		if err != nil {
 			return err
 		}
 
-		if strings.HasSuffix(obj.Name, ".log") {
+		if !strings.HasSuffix(obj.Name, ".log") {
 			// skip non-log files
 			continue
 		}
