@@ -2,9 +2,12 @@
 runtime: go113
 
 env_variables:
-  CONSUMER_ENDPOINT: "https://rkperes-consumer-0.appspot.com"
-  RESULTS_DIR: "/tmp/producer/"
-  RUN_ID: "real4"
+  CONSUMER_ENDPOINT: "https://drwz-consumer.appspot.com"
+  GOOGLE_APPLICATION_CREDENTIALS: "./auth/sa-drwz.json"
+  NUMBER_OF_REQUESTS: "1e2" 
+  PAYLOAD_SIZE: "1e5"
+  BUCKET: "drwz-bucket"
+  PREFIX: "us-run-0"
 main: github.com/rafaelkperes/tcc/cmd/producer
 instance_class: B4_HIGHMEM
 manual_scaling:

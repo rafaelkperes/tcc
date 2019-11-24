@@ -2,18 +2,21 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"net/http"
 	"os"
-	"strconv"
 
 	"github.com/rafaelkperes/tcc/internal/svc/cons"
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	envPort = "PORT"
+
+	defaultPort = "9000"
+)
+
 var (
 	_help = flag.Bool("h", false, "display this help")
-	_port = flag.Int("p", 9000, "set consumer port")
 )
 
 func main() {
@@ -24,23 +27,27 @@ func main() {
 		os.Exit(0)
 	}
 
-	port := *_port
-	if sp := os.Getenv("PORT"); len(sp) > 0 {
-		p, err := strconv.Atoi(sp)
-		if err != nil {
-			log.WithError(err).Error("invalid format in PORT environment variable")
-		} else {
-			port = p
-		}
+	port, ok := os.LookupEnv(envPort)
+	if !ok {
+		log.Warningf("%s not set", envPort)
+		port = defaultPort
 	}
+	log.Infof("serving on HTTP port %s", port)
 
 	// setup logging
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetOutput(os.Stderr)
 
-	log.WithFields(log.Fields{"port": port}).Infof("listen and serve at port %d", port)
-	err := http.ListenAndServe(fmt.Sprintf(":%d", port), cons.NewConsumerServer())
-	log.Fatal(err)
+	log.WithFields(log.Fields{"port": port}).Infof("listen and serve at port %s", port)
+	// setup server
+	http.HandleFunc("/_ah/start", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+	http.HandleFunc("/_ah/stop", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+	http.Handle("/", cons.NewConsumerServer())
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 func displayHelp() {

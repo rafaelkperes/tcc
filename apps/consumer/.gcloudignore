@@ -28,3 +28,5 @@
 *.md
 *.pdf
 docs/
+plots/
+bin/
